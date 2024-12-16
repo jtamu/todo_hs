@@ -25,4 +25,5 @@ main = do
     mapM_ putStrLn contents'
 
 formatLine :: (Integer, String) -> String
-formatLine (i, line) = let [a, b] = splitOn "," line in show i ++ ") " ++ "task: " ++ a ++ ", status: " ++ b
+formatLine (i, line) = case splitOn "," line of
+  [a, b] -> show i ++ ") " ++ "task: " ++ a ++ ", status: " ++ b
