@@ -12,6 +12,7 @@
 module Main where
 
 import Data.List.Split
+import Data.Maybe
 import System.IO
 
 main :: IO ()
@@ -20,10 +21,11 @@ main = do
     contents <- hGetContents handle
     putStrLn "contents: "
     let zipped = zip [1 ..] (tail $ lines contents) :: [(Integer, String)]
-        contents' = map formatLine zipped
+        contents' = mapMaybe formatLine zipped
 
     mapM_ putStrLn contents'
 
-formatLine :: (Integer, String) -> String
+formatLine :: (Integer, String) -> Maybe String
 formatLine (i, line) = case splitOn "," line of
-  [a, b] -> show i ++ ") " ++ "task: " ++ a ++ ", status: " ++ b
+  [a, b] -> Just $ show i ++ ") " ++ "task: " ++ a ++ ", status: " ++ b
+  _ -> Nothing
