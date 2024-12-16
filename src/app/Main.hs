@@ -17,7 +17,11 @@ import System.IO
 
 main :: IO ()
 main = do
-  withFile "tasks.csv" ReadMode $ \handle -> do
+  listContents "tasks.csv"
+
+listContents :: String -> IO ()
+listContents fileName = do
+  withFile fileName ReadMode $ \handle -> do
     contents <- hGetContents handle
     putStrLn "contents: "
     mapM_ putStrLn (formatContents contents)
