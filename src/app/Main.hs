@@ -13,11 +13,19 @@ module Main where
 
 import Data.List.Split
 import Data.Maybe
+import System.Environment
 import System.IO
 
 main :: IO ()
 main = do
-  listContents "tasks.csv"
+  args <- getArgs
+  case args of
+    [fileName, command] -> switchCommand fileName command
+    _ -> putStrLn "Usage: ./Main [ファイル名] [オプション]"
+
+switchCommand :: String -> String -> IO ()
+switchCommand fileName "list" = listContents fileName
+switchCommand _ _ = putStrLn "Unknown command"
 
 listContents :: String -> IO ()
 listContents fileName = do

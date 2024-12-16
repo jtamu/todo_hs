@@ -1,8 +1,10 @@
 *
+!Makefile
 !*.*
 !*/
 *.hi
 *.o
+*.csv
 
 cabal.project.local
 dist-newstyle/
