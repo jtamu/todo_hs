@@ -20,10 +20,10 @@ main = do
   withFile "tasks.csv" ReadMode $ \handle -> do
     contents <- hGetContents handle
     putStrLn "contents: "
-    let zipped = zip [1 ..] (tail $ lines contents) :: [(Integer, String)]
-        contents' = mapMaybe formatLine zipped
+    mapM_ putStrLn (formatContents contents)
 
-    mapM_ putStrLn contents'
+formatContents :: String -> [String]
+formatContents contents = mapMaybe formatLine (zip [1 ..] (tail $ lines contents))
 
 formatLine :: (Integer, String) -> Maybe String
 formatLine (i, line) = case splitOn "," line of
