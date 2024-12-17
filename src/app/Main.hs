@@ -13,6 +13,7 @@ module Main where
 
 import Data.List.Split
 import Data.Maybe
+import System.Directory
 import System.Environment
 import System.IO
 
@@ -26,6 +27,7 @@ main = do
 switchCommand :: String -> String -> [String] -> IO ()
 switchCommand fileName "list" _ = listTasks fileName
 switchCommand fileName "add" [task] = addTask fileName task
+switchCommand fileName "delete" [index] = deleteTask fileName (read index :: Integer)
 switchCommand _ _ _ = putStrLn "Unknown command"
 
 addTask :: String -> String -> IO ()
@@ -33,6 +35,21 @@ addTask fileName task = do
   let contents = task ++ ",yet\n"
   putStrLn $ "write content: " ++ contents
   appendFile fileName contents
+
+deleteTask :: String -> Integer -> IO ()
+deleteTask fileName index = do
+  withFile fileName ReadMode $ \handle -> do
+    contents <- hGetContents handle
+    let lines_ = lines contents
+        newLines = [x | (idx, x) <- zip [0 ..] lines_, idx /= index]
+
+    withFile "tmp.csv" WriteMode $ \tmpHandle -> do
+      mapM_ (hPutStrLn tmpHandle) newLines
+
+    renameFile "tmp.csv" fileName
+    removeFile "tmp.csv"
+
+  putStrLn $ "deleted:" ++ show index
 
 listTasks :: String -> IO ()
 listTasks fileName = do
