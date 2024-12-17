@@ -24,6 +24,9 @@ main = do
     fileName : command : rest -> switchCommand fileName command rest
     _ -> putStrLn "Usage: ./Main [ファイル名] [オプション]"
 
+tmpFileName :: String
+tmpFileName = "tmp.csv"
+
 switchCommand :: String -> String -> [String] -> IO ()
 switchCommand fileName "list" _ = listTasks fileName
 switchCommand fileName "add" [task] = addTask fileName task
@@ -43,11 +46,11 @@ deleteTask fileName index = do
     let lines_ = lines contents
         newLines = [x | (idx, x) <- zip [0 ..] lines_, idx /= index]
 
-    withFile "tmp.csv" WriteMode $ \tmpHandle -> do
+    withFile tmpFileName WriteMode $ \tmpHandle -> do
       mapM_ (hPutStrLn tmpHandle) newLines
 
-    renameFile "tmp.csv" fileName
-    removeFile "tmp.csv"
+    renameFile tmpFileName fileName
+    removeFile tmpFileName
 
   putStrLn $ "deleted:" ++ show index
 
