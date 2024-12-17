@@ -11,6 +11,7 @@
 
 module Main where
 
+import Data.List
 import Data.List.Split
 import Data.Maybe
 import System.Directory
@@ -31,6 +32,7 @@ switchCommand :: String -> String -> [String] -> IO ()
 switchCommand fileName "list" _ = listTasks fileName
 switchCommand fileName "add" [task] = addTask fileName task
 switchCommand fileName "delete" [index] = deleteTask fileName (read index :: Integer)
+switchCommand fileName "complete" [index] = completeTask fileName (read index :: Integer)
 switchCommand _ _ _ = putStrLn "Unknown command"
 
 addTask :: String -> String -> IO ()
@@ -49,10 +51,24 @@ deleteTask fileName index = do
     withFile tmpFileName WriteMode $ \tmpHandle -> do
       mapM_ (hPutStrLn tmpHandle) newLines
 
-    renameFile tmpFileName fileName
-    removeFile tmpFileName
-
+  renameFile tmpFileName fileName
   putStrLn $ "deleted:" ++ show index
+
+completeTask :: String -> Integer -> IO ()
+completeTask fileName index = do
+  withFile fileName ReadMode $ \handle -> do
+    contents <- hGetContents handle
+    let lines_ = lines contents
+        newLines = [if idx /= index then x else replaceAll "yet" "done" x | (idx, x) <- zip [0 ..] lines_]
+
+    withFile tmpFileName WriteMode $ \tmpHandle -> do
+      mapM_ (hPutStrLn tmpHandle) newLines
+
+  renameFile tmpFileName fileName
+  putStrLn $ "completed:" ++ show index
+
+replaceAll :: String -> String -> String -> String
+replaceAll old new = intercalate new . splitOn old
 
 listTasks :: String -> IO ()
 listTasks fileName = do
