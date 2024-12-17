@@ -24,27 +24,27 @@ main = do
     _ -> putStrLn "Usage: ./Main [ファイル名] [オプション]"
 
 switchCommand :: String -> String -> [String] -> IO ()
-switchCommand fileName "list" _ = listContents fileName
-switchCommand fileName "add" [task] = addContents fileName task
+switchCommand fileName "list" _ = listTasks fileName
+switchCommand fileName "add" [task] = addTask fileName task
 switchCommand _ _ _ = putStrLn "Unknown command"
 
-addContents :: String -> String -> IO ()
-addContents fileName task = do
+addTask :: String -> String -> IO ()
+addTask fileName task = do
   let contents = task ++ ",yet\n"
   putStrLn $ "write content: " ++ contents
   appendFile fileName contents
 
-listContents :: String -> IO ()
-listContents fileName = do
+listTasks :: String -> IO ()
+listTasks fileName = do
   withFile fileName ReadMode $ \handle -> do
     contents <- hGetContents handle
     putStrLn "contents: "
-    mapM_ putStrLn (formatContents contents)
+    mapM_ putStrLn (formatTasks contents)
 
-formatContents :: String -> [String]
-formatContents contents = mapMaybe formatLine (zip [1 ..] (tail $ lines contents))
+formatTasks :: String -> [String]
+formatTasks contents = mapMaybe formatTask (zip [1 ..] (tail $ lines contents))
 
-formatLine :: (Integer, String) -> Maybe String
-formatLine (i, line) = case splitOn "," line of
+formatTask :: (Integer, String) -> Maybe String
+formatTask (i, line) = case splitOn "," line of
   [a, b] -> Just $ show i ++ ") " ++ "task: " ++ a ++ ", status: " ++ b
   _ -> Nothing
