@@ -29,20 +29,22 @@ tmpFileName :: String
 tmpFileName = "tmp.csv"
 
 switchCommand :: String -> String -> [String] -> IO ()
-switchCommand fileName "list" _ = listTasks fileName
-switchCommand fileName "add" [task] = addTask fileName task
-switchCommand fileName "delete" [index] = deleteTask fileName (read index :: Integer)
-switchCommand fileName "complete" [index] = completeTask fileName (read index :: Integer)
-switchCommand _ _ _ = putStrLn "Unknown command"
+switchCommand fileName "list" = listTasks fileName
+switchCommand fileName "add" = addTask fileName
+switchCommand fileName "delete" = deleteTask fileName
+switchCommand fileName "complete" = completeTask fileName
+switchCommand _ _ = \_ -> putStrLn "Unknown command"
 
-addTask :: String -> String -> IO ()
-addTask fileName task = do
+addTask :: String -> [String] -> IO ()
+addTask fileName [task] = do
   let contents = task ++ ",yet\n"
   putStrLn $ "write content: " ++ contents
   appendFile fileName contents
+addTask _ _ = putStrLn "task add requires a task"
 
-deleteTask :: String -> Integer -> IO ()
-deleteTask fileName index = do
+deleteTask :: String -> [String] -> IO ()
+deleteTask fileName [indexStr] = do
+  let index = read indexStr :: Integer
   withFile fileName ReadMode $ \handle -> do
     contents <- hGetContents handle
     let lines_ = lines contents
@@ -53,9 +55,11 @@ deleteTask fileName index = do
 
   renameFile tmpFileName fileName
   putStrLn $ "deleted:" ++ show index
+deleteTask _ _ = putStrLn "task delete requires an index"
 
-completeTask :: String -> Integer -> IO ()
-completeTask fileName index = do
+completeTask :: String -> [String] -> IO ()
+completeTask fileName [indexStr] = do
+  let index = read indexStr :: Integer
   withFile fileName ReadMode $ \handle -> do
     contents <- hGetContents handle
     let lines_ = lines contents
@@ -66,12 +70,13 @@ completeTask fileName index = do
 
   renameFile tmpFileName fileName
   putStrLn $ "completed:" ++ show index
+completeTask _ _ = putStrLn "task complete requires an index"
 
 replaceAll :: String -> String -> String -> String
 replaceAll old new = intercalate new . splitOn old
 
-listTasks :: String -> IO ()
-listTasks fileName = do
+listTasks :: String -> [String] -> IO ()
+listTasks fileName _ = do
   withFile fileName ReadMode $ \handle -> do
     contents <- hGetContents handle
     putStrLn "contents: "
