@@ -20,12 +20,19 @@ main :: IO ()
 main = do
   args <- getArgs
   case args of
-    [fileName, command] -> switchCommand fileName command
+    fileName : command : rest -> switchCommand fileName command rest
     _ -> putStrLn "Usage: ./Main [ファイル名] [オプション]"
 
-switchCommand :: String -> String -> IO ()
-switchCommand fileName "list" = listContents fileName
-switchCommand _ _ = putStrLn "Unknown command"
+switchCommand :: String -> String -> [String] -> IO ()
+switchCommand fileName "list" _ = listContents fileName
+switchCommand fileName "add" [task] = addContents fileName task
+switchCommand _ _ _ = putStrLn "Unknown command"
+
+addContents :: String -> String -> IO ()
+addContents fileName task = do
+  let contents = task ++ ",yet\n"
+  putStrLn $ "write content: " ++ contents
+  appendFile fileName contents
 
 listContents :: String -> IO ()
 listContents fileName = do
